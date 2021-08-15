@@ -82,10 +82,10 @@ export class Router {
       global.history.pushState(state, path, path);
     }
 
-    this.checkPath(match, path) && onEnter && onEnter(args);
+    this.checkPath(match, path) && onEnter && (await onEnter(args));
 
     if (this.checkPath(match, this.prevPath)) {
-      onLeave && onLeave(args);
+      onLeave && (await onLeave(args));
     }
   }
 
