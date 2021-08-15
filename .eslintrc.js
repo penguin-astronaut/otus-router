@@ -24,6 +24,7 @@ module.exports = {
     "no-param-reassign": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "no-unused-expressions"
+    "no-unused-expressions": "off",
+    "no-console": "off",
   },
 };
