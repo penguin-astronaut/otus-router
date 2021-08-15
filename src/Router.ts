@@ -24,6 +24,7 @@ export class Router {
   private listeners: Map<match, Hooks> = new Map();
 
   constructor(hashMode = false, selector = "a") {
+    this.hashMode = hashMode;
     document.body.addEventListener("click", (e: Event) => {
       if (!(e.target as HTMLElement).matches(selector)) {
         return;
@@ -32,6 +33,16 @@ export class Router {
       const uri = (e.target as HTMLLinkElement).getAttribute("href");
       this.handleListeners(uri);
     });
+
+    if (hashMode) {
+      window.addEventListener("hashchange", () => {
+        this.handleListeners(this.getPathName());
+      });
+    } else {
+      window.addEventListener("popstate", () => {
+        this.handleListeners(this.getPathName());
+      });
+    }
   }
 
   private checkPath(match: match, path: string): boolean {
@@ -57,16 +68,19 @@ export class Router {
     const args = {
       previosPath: this.prevPath,
       path,
-      state: global.history.state,
+      state: state ?? {},
     };
     const { onEnter, onLeave, beforeEnter } = listeners;
 
-    this.prevPath = global.location.pathname;
+    this.prevPath = this.getPathName();
 
     this.checkPath(match, path) && beforeEnter && (await beforeEnter(args));
 
-    global.history.pushState(state, path, path);
-    args.state = state;
+    if (this.hashMode) {
+      global.location.hash = path;
+    } else {
+      global.history.pushState(state, path, path);
+    }
 
     this.checkPath(match, path) && onEnter && onEnter(args);
 
@@ -75,10 +89,14 @@ export class Router {
     }
   }
 
+  private getPathName(): string {
+    return this.hashMode ? global.location.hash : global.location.pathname;
+  }
+
   on(route: Route) {
     const { match, ...listeners } = route;
     this.listeners.set(match, listeners);
-    this.handleListener(listeners, match, global.location.pathname);
+    this.handleListener(listeners, match, this.getPathName());
   }
 
   go(path: string, state: HistoryState = {}): void {

@@ -1,6 +1,6 @@
 import { Router } from "./Router";
 
-const router = new Router();
+const router = new Router(true);
 async function test() {
   document.querySelector(".content").innerHTML = global.location.href;
   console.log("call");
