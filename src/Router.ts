@@ -1,5 +1,5 @@
-type listener = (...args: any[]) => Promise<void>;
-type pathFunc = (...args: any[]) => void;
+type listener = (...args: any[]) => Promise<any>;
+type pathFunc = (path: string) => boolean;
 type match = string | RegExp | pathFunc;
 
 interface Hooks {
