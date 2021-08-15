@@ -33,16 +33,6 @@ export class Router {
       const uri = (e.target as HTMLLinkElement).getAttribute("href");
       this.handleListeners(uri);
     });
-
-    if (hashMode) {
-      window.addEventListener("hashchange", () => {
-        this.handleListeners(this.getPathName());
-      });
-    } else {
-      window.addEventListener("popstate", () => {
-        this.handleListeners(this.getPathName());
-      });
-    }
   }
 
   private checkPath(match: match, path: string): boolean {
@@ -83,14 +73,15 @@ export class Router {
     }
 
     this.checkPath(match, path) && onEnter && (await onEnter(args));
-
     if (this.checkPath(match, this.prevPath)) {
       onLeave && (await onLeave(args));
     }
   }
 
   private getPathName(): string {
-    return this.hashMode ? global.location.hash : global.location.pathname;
+    return this.hashMode
+      ? global.location.hash.slice(1)
+      : global.location.pathname;
   }
 
   on(route: Route): () => void {
