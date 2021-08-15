@@ -1,4 +1,9 @@
-type listener = (...args: any[]) => Promise<any>;
+interface listenerInput {
+  previosPath: string;
+  path: string;
+  state: Record<string, any>;
+}
+type listener = (input: listenerInput) => Promise<any>;
 type pathFunc = (path: string) => boolean;
 type match = string | RegExp | pathFunc;
 
