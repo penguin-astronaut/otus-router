@@ -93,10 +93,14 @@ export class Router {
     return this.hashMode ? global.location.hash : global.location.pathname;
   }
 
-  on(route: Route) {
+  on(route: Route): () => void {
     const { match, ...listeners } = route;
     this.listeners.set(match, listeners);
     this.handleListener(listeners, match, this.getPathName());
+
+    return (): void => {
+      this.listeners.delete(match);
+    };
   }
 
   go(path: string, state: HistoryState = {}): void {
