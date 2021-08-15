@@ -61,18 +61,18 @@ export class Router {
       state: state ?? {},
     };
     const { onEnter, onLeave, beforeEnter } = listeners;
-
     this.prevPath = this.getPathName();
 
     this.checkPath(match, path) && beforeEnter && (await beforeEnter(args));
 
-    if (this.hashMode) {
-      global.location.hash = path;
-    } else {
-      global.history.pushState(state, path, path);
+    if (this.checkPath(match, path) && onEnter) {
+      if (this.hashMode) {
+        global.location.hash = path;
+      } else {
+        global.history.pushState(state, path, path);
+      }
+      await onEnter(args);
     }
-
-    this.checkPath(match, path) && onEnter && (await onEnter(args));
     if (this.checkPath(match, this.prevPath)) {
       onLeave && (await onLeave(args));
     }
