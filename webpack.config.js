@@ -1,5 +1,5 @@
 const path = require("path");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.ts",
@@ -7,7 +7,7 @@ module.exports = {
     filename: "main.js",
     path: path.resolve(__dirname, "dist"),
     clean: true,
-    publicPath: "/"
+    publicPath: "/",
   },
   target: "web",
   devServer: {
@@ -33,7 +33,6 @@ module.exports = {
       title: "Game of life",
     }),
   ],
-
 
   resolve: {
     extensions: [".ts", ".js"],
