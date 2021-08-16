@@ -14,83 +14,123 @@ beforeEach(() => {
     <a href='/test6'>Home</a>
     <div class='content'></div>
   `;
+  window.history.pushState({}, "/", "/");
 });
+
 function getPathName(hashMode: boolean): string {
   return hashMode ? global.location.hash.slice(1) : global.location.pathname;
 }
 
-[true, false].forEach((hashMode) => {
-  describe(`Router test hashmode: ${hashMode} `, () => {
-    it("test on", async () => {
-      const links = document.querySelectorAll("a");
-      const router = new Router(hashMode);
-      async function stringOnEnter() {
-        document.querySelector(".content").innerHTML = "test1 linked";
-      }
-      async function regOnEnter() {
-        document.querySelector(".content").innerHTML =
-          "test 2 and 3 link linked";
-      }
-      const funcOnEnter = jest.fn(() => Promise.resolve());
-      const stringOnLeave = jest.fn(() => Promise.resolve());
-      const stringBeforeEnter = jest.fn(
-        (): Promise<void> => new Promise((r) => setTimeout(r, 50))
-      );
-      router.on({
-        match: "/test1",
-        onEnter: stringOnEnter,
-        onLeave: stringOnLeave,
-        beforeEnter: stringBeforeEnter,
-      });
-      router.on({ match: new RegExp("/test[2-3]"), onEnter: regOnEnter });
-      router.on({
-        match: (path: string): boolean => path.length === 7,
-        onEnter: funcOnEnter,
-      });
-
-      links[0].click();
-
-      await sleep(10);
-      expect(stringBeforeEnter).toHaveBeenCalled();
-      expect(getPathName(hashMode)).toBe(hashMode ? "" : "/");
-      expect(document.querySelector(".content").innerHTML).toBeFalsy();
-      await sleep(41);
-      expect(getPathName(hashMode)).toBe("/test1");
-      expect(document.querySelector(".content").innerHTML).toBe("test1 linked");
-      expect(stringOnLeave).not.toHaveBeenCalled();
-
-      links[1].click();
-      await sleep(10);
-      expect(getPathName(hashMode)).toBe("/test2");
-      expect(stringBeforeEnter).toHaveBeenCalledTimes(1);
-      expect(funcOnEnter).not.toHaveBeenCalled();
-      expect(document.querySelector(".content").innerHTML).toBe(
-        "test 2 and 3 link linked"
-      );
-
-      links[4].click();
-      await sleep(10);
-      expect(getPathName(hashMode)).toBe("/linkme");
-      expect(funcOnEnter).toHaveBeenCalledWith({
-        path: "/linkme",
-        previosPath: "/test2",
-        state: {},
-      });
+describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
+  it("test on", async () => {
+    const links = document.querySelectorAll("a");
+    const router = new Router(hashMode);
+    async function stringOnEnter() {
+      document.querySelector(".content").innerHTML = "test1 linked";
+    }
+    async function regOnEnter() {
+      document.querySelector(".content").innerHTML = "test 2 and 3 link linked";
+    }
+    const funcOnEnter = jest.fn(() => Promise.resolve());
+    const stringOnLeave = jest.fn(() => Promise.resolve());
+    const stringBeforeEnter = jest.fn(
+      (): Promise<void> => new Promise((r) => setTimeout(r, 50))
+    );
+    router.on({
+      match: "/test1",
+      onEnter: stringOnEnter,
+      onLeave: stringOnLeave,
+      beforeEnter: stringBeforeEnter,
+    });
+    router.on({ match: new RegExp("/test[2-3]"), onEnter: regOnEnter });
+    router.on({
+      match: (path: string): boolean => path.length === 7,
+      onEnter: funcOnEnter,
     });
 
-    it("on with selector", async () => {
-      const links = document.querySelectorAll("a");
-      const router = new Router(hashMode, ".router-link");
-      const onEnter = jest.fn(() => Promise.resolve());
-      router.on({ match: new RegExp("test\\d+"), onEnter });
+    links[0].click();
 
-      links[1].click();
-      await sleep(10);
-      expect(onEnter).toHaveBeenCalledTimes(1);
+    await sleep(10);
+    expect(stringBeforeEnter).toHaveBeenCalled();
+    expect(getPathName(hashMode)).toBe(hashMode ? "" : "/");
+    // expect(document.querySelector(".content").innerHTML).toBe("test1 linked");
+    await sleep(41);
+    expect(getPathName(hashMode)).toBe("/test1");
+    expect(document.querySelector(".content").innerHTML).toBe("test1 linked");
+    expect(stringOnLeave).not.toHaveBeenCalled();
 
-      links[5].click();
-      await sleep(10);
-      expect(onEnter).toHaveBeenCalledTimes(1);
+    links[1].click();
+    await sleep(10);
+    expect(getPathName(hashMode)).toBe("/test2");
+    expect(stringBeforeEnter).toHaveBeenCalledTimes(1);
+    expect(funcOnEnter).not.toHaveBeenCalled();
+    expect(document.querySelector(".content").innerHTML).toBe(
+      "test 2 and 3 link linked"
+    );
+
+    links[4].click();
+    await sleep(10);
+    expect(getPathName(hashMode)).toBe("/linkme");
+    expect(funcOnEnter).toHaveBeenCalledWith({
+      path: "/linkme",
+      previosPath: "/test2",
+      state: {},
     });
+  });
+
+  it("on with selector", async () => {
+    const links = document.querySelectorAll("a");
+    const router = new Router(hashMode, ".router-link");
+    const onEnter = jest.fn(() => Promise.resolve());
+    router.on({ match: new RegExp("test\\d+"), onEnter });
+
+    links[1].click();
+    await sleep(10);
+    expect(onEnter).toHaveBeenCalledTimes(1);
+
+    links[5].click();
+    await sleep(10);
+    expect(onEnter).toHaveBeenCalledTimes(1);
+  });
+
+  it("remove route", async () => {
+    const router = new Router();
+    const links = document.querySelectorAll("a");
+    const onEnter = jest.fn(() => Promise.resolve());
+    const removeRoute = router.on({
+      match: "/test1",
+      onEnter,
+    });
+    links[0].click();
+    await sleep(10);
+    expect(onEnter).toHaveBeenCalledTimes(1);
+
+    links[0].click();
+    await sleep(10);
+    expect(onEnter).toHaveBeenCalledTimes(2);
+
+    removeRoute();
+
+    links[0].click();
+    await sleep(10);
+    expect(onEnter).toHaveBeenCalledTimes(2);
+  });
+
+  it("test go", async () => {
+    const router = new Router(hashMode);
+    const onEnter = jest.fn(() => Promise.resolve());
+    router.on({
+      match: "/test1",
+      onEnter,
+    });
+    expect(onEnter).toHaveBeenCalledTimes(0);
+    router.go("/test1", { test: "test" });
+    await sleep(20);
+    expect(onEnter).toHaveBeenCalledWith({
+      path: "/test1",
+      previosPath: hashMode ? "" : "/",
+      state: { test: "test" },
+    });
+    expect(getPathName(hashMode)).toBe("/test1");
   });
 });

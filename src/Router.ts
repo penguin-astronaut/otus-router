@@ -93,7 +93,6 @@ export class Router {
     const { match, ...listeners } = route;
     this.listeners.set(match, listeners);
     this.handleListener(listeners, match, this.getPathName());
-
     return (): void => {
       this.listeners.delete(match);
     };
