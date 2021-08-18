@@ -1,8 +1,7 @@
 {
-  "name": "otus-calendar-api",
+  "name": "pengRouter",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Simple js router",
   "scripts": {
     "test": "jest",
     "lint": "prettier --check . && eslint --ext .js,.ts",
@@ -12,8 +11,8 @@
     "serve": "webpack serve --mode=development"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "peng",
+  "license": "MIT",
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "@typescript-eslint/eslint-plugin": "^4.29.0",

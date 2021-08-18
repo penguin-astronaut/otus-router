@@ -4,21 +4,28 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   document.body.innerHTML = `
     <a class='router-link' href='/test1'>Test1</a>
     <a class='router-link' href='/test2'>Test2</a>
     <a class='router-link' href='/test3'>TEst3</a>
-    <a class='router-link' href='/mylink'>Home</a>
+    <a class='router-link' href='/mylink?param1=123&param2=abc'>Home</a>
     <a class='router-link' href='/linkme'>Home</a>
     <a href='/test6'>Home</a>
     <div class='content'></div>
   `;
-  window.history.pushState({}, "/", "/");
+
+  global.history.pushState({}, "", "/");
+});
+
+afterEach(() => {
+  document.documentElement.innerHTML = "<head></head><body></body>";
 });
 
 function getPathName(hashMode: boolean): string {
-  return hashMode ? global.location.hash.slice(1) : global.location.pathname;
+  return hashMode
+    ? global.location.hash.slice(1).split("?")[0]
+    : global.location.pathname;
 }
 
 describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
@@ -28,6 +35,7 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     async function stringOnEnter() {
       document.querySelector(".content").innerHTML = "test1 linked";
     }
+    const stringOnEnter2 = jest.fn();
     async function regOnEnter() {
       document.querySelector(".content").innerHTML = "test 2 and 3 link linked";
     }
@@ -38,26 +46,25 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     );
     router.on({
       match: "/test1",
-      onEnter: stringOnEnter,
-      onLeave: stringOnLeave,
-      beforeEnter: stringBeforeEnter,
+      onEnter: [stringOnEnter, stringOnEnter2],
+      onLeave: [stringOnLeave],
+      beforeEnter: [stringBeforeEnter],
     });
-    router.on({ match: new RegExp("/test[2-3]"), onEnter: regOnEnter });
+    router.on({ match: new RegExp("/test[2-3]"), onEnter: [regOnEnter] });
     router.on({
       match: (path: string): boolean => path.length === 7,
-      onEnter: funcOnEnter,
+      onEnter: [funcOnEnter],
     });
 
     links[0].click();
 
     await sleep(10);
     expect(stringBeforeEnter).toHaveBeenCalled();
-    expect(getPathName(hashMode)).toBe(hashMode ? "" : "/");
-    // expect(document.querySelector(".content").innerHTML).toBe("test1 linked");
     await sleep(41);
     expect(getPathName(hashMode)).toBe("/test1");
     expect(document.querySelector(".content").innerHTML).toBe("test1 linked");
     expect(stringOnLeave).not.toHaveBeenCalled();
+    expect(stringOnEnter2).toHaveBeenCalled();
 
     links[1].click();
     await sleep(10);
@@ -82,7 +89,7 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     const links = document.querySelectorAll("a");
     const router = new Router(hashMode, ".router-link");
     const onEnter = jest.fn(() => Promise.resolve());
-    router.on({ match: new RegExp("test\\d+"), onEnter });
+    router.on({ match: new RegExp("test\\d+"), onEnter: [onEnter] });
 
     links[1].click();
     await sleep(10);
@@ -94,12 +101,12 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
   });
 
   it("remove route", async () => {
-    const router = new Router();
+    const router = new Router(hashMode);
     const links = document.querySelectorAll("a");
     const onEnter = jest.fn(() => Promise.resolve());
     const removeRoute = router.on({
       match: "/test1",
-      onEnter,
+      onEnter: [onEnter],
     });
     links[0].click();
     await sleep(10);
@@ -121,7 +128,7 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     const onEnter = jest.fn(() => Promise.resolve());
     router.on({
       match: "/test1",
-      onEnter,
+      onEnter: [onEnter],
     });
     expect(onEnter).toHaveBeenCalledTimes(0);
     router.go("/test1", { test: "test" });
@@ -132,5 +139,20 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
       state: { test: "test" },
     });
     expect(getPathName(hashMode)).toBe("/test1");
+  });
+
+  it("test params", async () => {
+    const links = document.querySelectorAll("a");
+    const router = new Router(hashMode);
+    const onEnter = jest.fn(() => Promise.resolve());
+    router.on({ match: new RegExp("mylink"), onEnter: [onEnter] });
+
+    links[3].click();
+    expect(onEnter).toHaveBeenCalledTimes(1);
+    expect(onEnter).toHaveBeenCalledWith({
+      path: "/mylink?param1=123&param2=abc",
+      previosPath: hashMode ? "" : "/",
+      state: { param1: "123", param2: "abc" },
+    });
   });
 });

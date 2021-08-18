@@ -3,21 +3,21 @@ interface listenerInput {
   path: string;
   state: Record<string, any>;
 }
-type listener = (input: listenerInput) => Promise<any>;
+type listener = (input: listenerInput) => Promise<any> | any;
 type pathFunc = (path: string) => boolean;
 type match = string | RegExp | pathFunc;
 
 interface Hooks {
-  onEnter?: listener;
-  onLeave?: listener;
-  beforeEnter?: listener;
+  onEnter?: listener[];
+  onLeave?: listener[];
+  beforeEnter?: listener[];
 }
 
 interface Route extends Hooks {
   match: match;
 }
 
-interface HistoryState {
+interface PathState {
   [key: string]: any;
 }
 
@@ -30,12 +30,19 @@ export class Router {
 
   constructor(hashMode = false, selector = "a") {
     this.hashMode = hashMode;
+    this.prevPath = this.getPathName();
     document.body.addEventListener("click", (e: Event) => {
       if (!(e.target as HTMLElement).matches(selector)) {
         return;
       }
       e.preventDefault();
       const uri = (e.target as HTMLLinkElement).getAttribute("href");
+      this.prevPath = this.getPathName();
+      if (this.hashMode) {
+        global.location.hash = uri;
+      } else {
+        global.history.pushState({}, "", uri);
+      }
       this.handleListeners(uri);
     });
   }
@@ -48,7 +55,7 @@ export class Router {
     );
   }
 
-  private handleListeners(path: string, state: HistoryState = {}): void {
+  private handleListeners(path: string, state: PathState = {}): void {
     this.listeners.forEach((listeners: Hooks, match: match) => {
       this.handleListener(listeners, match, path, state);
     });
@@ -58,35 +65,52 @@ export class Router {
     listeners: Hooks,
     match: match,
     path: string,
-    state?: HistoryState
+    state: PathState = {}
   ) {
+    const argsSate = { ...state, ...this.getQueryParams() };
     const args = {
       previosPath: this.prevPath,
       path,
-      state: state ?? {},
+      state: argsSate,
     };
     const { onEnter, onLeave, beforeEnter } = listeners;
-    this.prevPath = this.getPathName();
 
-    this.checkPath(match, path) && beforeEnter && (await beforeEnter(args));
+    this.checkPath(match, path) &&
+      beforeEnter &&
+      this.callHook(beforeEnter, args);
 
     if (this.checkPath(match, path) && onEnter) {
-      if (this.hashMode) {
-        global.location.hash = path;
-      } else {
-        global.history.pushState(state, path, path);
-      }
-      await onEnter(args);
+      this.callHook(onEnter, args);
     }
     if (this.checkPath(match, this.prevPath)) {
-      onLeave && (await onLeave(args));
+      onLeave && this.callHook(onLeave, args);
     }
+  }
+
+  private callHook(listeners: listener[], args: listenerInput): void {
+    listeners?.forEach(async (listener: listener) => {
+      await listener(args);
+    });
   }
 
   private getPathName(): string {
     return this.hashMode
       ? global.location.hash.slice(1)
-      : global.location.pathname;
+      : global.location.pathname + global.location.search;
+  }
+
+  private getQueryParams(): PathState {
+    const searchString = /\?(.+)$/.exec(global.location.href);
+    if (!searchString) {
+      return {};
+    }
+    return searchString[1]
+      .split("&")
+      .reduce((state: PathState, param: string): PathState => {
+        const [name, value] = param.split("=");
+        state[name] = value;
+        return state;
+      }, {});
   }
 
   on(route: Route): () => void {
@@ -98,7 +122,13 @@ export class Router {
     };
   }
 
-  go(path: string, state: HistoryState = {}): void {
+  go(path: string, state: PathState = {}): void {
+    this.prevPath = this.getPathName();
+    if (this.hashMode) {
+      global.location.hash = path;
+    } else {
+      global.history.pushState(state, "", path);
+    }
     this.handleListeners(path, state);
   }
 }
