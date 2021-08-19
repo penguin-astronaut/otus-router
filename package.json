@@ -13,6 +13,14 @@
   "keywords": [],
   "author": "peng",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/penguin-astronaut/otus-router.git"
+  },
+  "bugs": {
+    "url": "https://github.com/penguin-astronaut/otus-router/issues"
+  },
+  "homepage": "https://github.com/penguin-astronaut/otus-router#readme",
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
