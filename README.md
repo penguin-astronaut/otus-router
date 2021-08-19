@@ -2,7 +2,7 @@
 
 ## Installation
 
-    npm install pengRouter
+    npm install peng-router
 
 ## Простой пример
 
