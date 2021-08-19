@@ -2,7 +2,7 @@
 
 ## Installation
 
-    npm install peng-router
+    npm install ot-router
 
 ## Простой пример
 

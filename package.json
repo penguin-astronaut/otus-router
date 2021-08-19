@@ -1,6 +1,6 @@
 {
-  "name": "peng-router",
-  "version": "1.0.1",
+  "name": "ot-router",
+  "version": "1.0.0",
   "description": "Simple js router",
   "scripts": {
     "test": "jest",
