@@ -1,27 +1,4 @@
-interface listenerInput {
-  previosPath: string;
-  path: string;
-  state: Record<string, any>;
-}
-type listener = (input: listenerInput) => Promise<any> | any;
-type pathFunc = (path: string) => boolean;
-type match = string | RegExp | pathFunc;
-
-interface Hooks {
-  onEnter?: listener[];
-  onLeave?: listener[];
-  beforeEnter?: listener[];
-}
-
-interface Route extends Hooks {
-  match: match;
-}
-
-interface PathState {
-  [key: string]: any;
-}
-
-export class Router {
+export class Router implements IRouter {
   private hashMode: boolean;
 
   private prevPath: string;
