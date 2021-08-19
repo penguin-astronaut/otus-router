@@ -7,7 +7,7 @@
 ## Простой пример
 
 ```js
-import { Router } from "./Router";
+import { Router } from "ot-router";
 
 const router = new Router()
 onEnter() {
@@ -24,7 +24,7 @@ const router = new Router(hashMode, selector);
 
 `hashMode` - boolean значение, которое говорит, использовать hash вместо History Api, по умолчанию false
 
-`selctor` - css селктор, по которому выбираются теги для роутинга, по умолчанию берутся все теги "a"
+`selctor` - css селектор, по которому выбираются теги для роутинга, по умолчанию берутся все теги "a"
 
 ### Методы
 
