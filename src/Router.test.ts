@@ -64,7 +64,7 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     expect(stringBeforeEnter).toHaveBeenCalled();
     await sleep(41);
     expect(getPathName(hashMode)).toBe("/test1");
-    expect(document.querySelector(".content") as HTMLElement).toBe(
+    expect((document.querySelector(".content") as HTMLElement).innerHTML).toBe(
       "test1 linked"
     );
     expect(stringOnLeave).not.toHaveBeenCalled();
