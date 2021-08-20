@@ -16,9 +16,9 @@ export class Router implements IRouter {
       const uri = (e.target as HTMLLinkElement).getAttribute("href");
       this.prevPath = this.getPathName();
       if (this.hashMode) {
-        global.location.hash = uri;
+        window.location.hash = uri;
       } else {
-        global.history.pushState({}, "", uri);
+        window.history.pushState({}, "", uri);
       }
       this.handleListeners(uri);
     });
@@ -72,12 +72,12 @@ export class Router implements IRouter {
 
   private getPathName(): string {
     return this.hashMode
-      ? global.location.hash.slice(1)
-      : global.location.pathname + global.location.search;
+      ? window.location.hash.slice(1)
+      : window.location.pathname + window.location.search;
   }
 
   private getQueryParams(): PathState {
-    const searchString = /\?(.+)$/.exec(global.location.href);
+    const searchString = /\?(.+)$/.exec(window.location.href);
     if (!searchString) {
       return {};
     }
@@ -102,9 +102,9 @@ export class Router implements IRouter {
   go(path: string, state: PathState = {}): void {
     this.prevPath = this.getPathName();
     if (this.hashMode) {
-      global.location.hash = path;
+      window.location.hash = path;
     } else {
-      global.history.pushState(state, "", path);
+      window.history.pushState(state, "", path);
     }
     this.handleListeners(path, state);
   }

@@ -15,7 +15,7 @@ beforeEach(async () => {
     <div class='content'></div>
   `;
 
-  global.history.pushState({}, "", "/");
+  window.history.pushState({}, "", "/");
 });
 
 afterEach(() => {
@@ -24,8 +24,8 @@ afterEach(() => {
 
 function getPathName(hashMode: boolean): string {
   return hashMode
-    ? global.location.hash.slice(1).split("?")[0]
-    : global.location.pathname;
+    ? window.location.hash.slice(1).split("?")[0]
+    : window.location.pathname;
 }
 
 describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
