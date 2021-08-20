@@ -13,7 +13,7 @@ export class Router implements IRouter {
         return;
       }
       e.preventDefault();
-      const uri = (e.target as HTMLLinkElement).getAttribute("href");
+      const uri = (e.target as HTMLLinkElement).getAttribute("href") ?? "";
       this.prevPath = this.getPathName();
       if (this.hashMode) {
         window.location.hash = uri;
