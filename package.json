@@ -2,14 +2,14 @@
   "name": "ot-router",
   "version": "1.1.1",
   "description": "Simple js router",
-  "types": "./src/Types.d.ts",
+  "main": "lib/index.js",
+  "types": "./lib",
   "scripts": {
     "test": "jest",
     "lint": "prettier --check . && eslint --ext .js,.ts",
     "lint:fix": "prettier --write . && eslint . --ext .js,.ts --fix",
     "prepare": "husky install",
-    "build": "webpack --mode=production",
-    "serve": "webpack serve --mode=development"
+    "build": "tsc -p ."
   },
   "keywords": [],
   "author": "peng",

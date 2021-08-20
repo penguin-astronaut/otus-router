@@ -33,11 +33,13 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     const links = document.querySelectorAll("a");
     const router = new Router(hashMode);
     async function stringOnEnter() {
-      document.querySelector(".content").innerHTML = "test1 linked";
+      (document.querySelector(".content") as HTMLElement).innerHTML =
+        "test1 linked";
     }
     const stringOnEnter2 = jest.fn();
     async function regOnEnter() {
-      document.querySelector(".content").innerHTML = "test 2 and 3 link linked";
+      (document.querySelector(".content") as HTMLElement).innerHTML =
+        "test 2 and 3 link linked";
     }
     const funcOnEnter = jest.fn(() => Promise.resolve());
     const stringOnLeave = jest.fn(() => Promise.resolve());
@@ -62,7 +64,9 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     expect(stringBeforeEnter).toHaveBeenCalled();
     await sleep(41);
     expect(getPathName(hashMode)).toBe("/test1");
-    expect(document.querySelector(".content").innerHTML).toBe("test1 linked");
+    expect(document.querySelector(".content") as HTMLElement).toBe(
+      "test1 linked"
+    );
     expect(stringOnLeave).not.toHaveBeenCalled();
     expect(stringOnEnter2).toHaveBeenCalled();
 
@@ -71,7 +75,7 @@ describe.each([true, false])(`Router test hashmode: %s`, (hashMode) => {
     expect(getPathName(hashMode)).toBe("/test2");
     expect(stringBeforeEnter).toHaveBeenCalledTimes(1);
     expect(funcOnEnter).not.toHaveBeenCalled();
-    expect(document.querySelector(".content").innerHTML).toBe(
+    expect((document.querySelector(".content") as HTMLElement).innerHTML).toBe(
       "test 2 and 3 link linked"
     );
 
