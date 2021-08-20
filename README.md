@@ -7,7 +7,7 @@
 ## Простой пример
 
 ```js
-import { Router } from "ot-router";
+import Router from "ot-router";
 
 const router = new Router()
 onEnter() {
