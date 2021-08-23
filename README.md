@@ -2,7 +2,7 @@
 
 ## Installation
 
-    npm install ot-router
+    npm i @penguin_astronaut/router
 
 ## Простой пример
 
